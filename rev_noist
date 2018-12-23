@@ -1,0 +1,33 @@
+import os
+import cv2
+import sys
+import landmarks as lm
+import numpy as np
+from keras.preprocessing import image
+
+# PATH TO ALL IMAGES
+global basedir, image_paths, target_size
+basedir = './dataset'
+images_dir = os.path.join(basedir)
+
+def rev_noise():
+    # Get user supplied values
+    imagePath = images_dir
+    cascPath = sys.argv[1]
+
+    # Create the face cascade
+    faceCascade = cv2.CascadeClassifier(cascPath)
+
+    # Read the image
+    image = cv2.imread(imagePath)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Detect faces in the image
+    faces = faceCascade.detectMultiScale(
+        gray,
+        scaleFactor=1.2,
+        minNeighbors=5,
+        minSize=(30, 30),
+        flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+    )
+
