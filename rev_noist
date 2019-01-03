@@ -8,8 +8,15 @@ images_dir = os.path.join(basedir,'dataset')
 # Create the face cascade
 face_patterns = cv2.CascadeClassifier(os.path.join(basedir,'haarcascade_frontalface_default.xml'))
 
+Train = []
+Test = []
 c = 1
 count = 0
+
+training_set = 'C:/Users/user/PycharmProjects/Assignment/venv/training_set'
+testing_set = 'C:/Users/user/PycharmProjects/Assignment/venv/testing_set'
+os.mkdir(training_set)
+os.mkdir(testing_set)
 
 for img in os.listdir(images_dir):
     im = str(c)+'.png'
@@ -25,15 +32,20 @@ for img in os.listdir(images_dir):
        minNeighbors=5,
       minSize=(100, 100),
     )
+
+    img_d = 'detected' + im
     if len(faces) != 0:
-        print(im)
         count += 1
+        if c>4000:
+            Test.append(c)
+            cv2.imwrite(os.path.join(testing_set, img_d), image);
+        else:
+            Train.append(c)
+            cv2.imwrite(os.path.join(training_set, img_d), image);
     for (x, y, w, h) in faces:
        cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
-    img_d = 'detected'+im
     if im == '1220.png':
         cv2.imwrite(os.path.join(basedir,img_d), image);
-    print(c)
     c += 1
 
 print(count)
