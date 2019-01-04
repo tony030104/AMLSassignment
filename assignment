@@ -1,0 +1,237 @@
+import cv2
+from keras.models import Sequential
+from keras.preprocessing.image import ImageDataGenerator
+from keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization
+from keras.layers import Conv2D, MaxPooling2D
+from keras import regularizers, optimizers
+import pandas as pd
+import numpy as np
+import os
+
+global basedir, smile, age, glasses, human, hair
+basedir = 'C:/Users/user/PycharmProjects/Assignment/venv'
+smile = 'Unnamed: 3'
+age = 'Unnamed: 4'
+glasses = 'Unnamed: 2'
+human = 'Unnamed: 5'
+hair = 'Unnamed: 1'
+
+def rev_noise():
+    # Image path
+    basedir = 'C:/Users/user/PycharmProjects/Assignment/venv'
+    images_dir = os.path.join(basedir, 'dataset')
+
+    # Create the face cascade
+    face_patterns = cv2.CascadeClassifier(os.path.join(basedir, 'haarcascade_frontalface_default.xml'))
+
+    Train = []
+    Test = []
+    c = 1
+    count = 0
+
+    training_set = 'C:/Users/user/PycharmProjects/Assignment/venv/training_set'
+    testing_set = 'C:/Users/user/PycharmProjects/Assignment/venv/testing_set'
+
+    if not os.path.exists(training_set):
+        os.mkdir(training_set)
+    if not os.path.exists(testing_set):
+        os.mkdir(testing_set)
+
+    for img in os.listdir(images_dir):
+        im = str(c) + '.png'
+
+        # Read the image
+        image = cv2.imread(os.path.join(images_dir, im))
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        # Detect faces in the image
+        faces = face_patterns.detectMultiScale(
+            gray,
+            scaleFactor=1.008,
+            minNeighbors=5,
+            minSize=(100, 100),
+        )
+
+        img_d = 'detected' + im
+        if len(faces) != 0:
+            count += 1
+            if c > 4000:
+                Test.append(c)
+                cv2.imwrite(os.path.join(testing_set, im), image);
+            else:
+                Train.append(c)
+                cv2.imwrite(os.path.join(training_set, im), image);
+        c += 1
+
+    print(count)
+
+    print(Train)
+    print(Test)
+
+    return 0
+
+def cnn(function):
+    traindf = pd.read_csv(os.path.join(basedir, 'attribute_list.csv'))
+    testdf = pd.read_csv(os.path.join(basedir, 'attribute_list.csv'))
+
+    # Fitting the CNN to the images
+    datagen = ImageDataGenerator(rescale=1. / 255., validation_split=0.25)
+
+    train_generator = datagen.flow_from_dataframe(
+        dataframe=traindf,
+        directory=os.path.join(basedir, 'training_set'),
+        x_col='5000',
+        y_col=function,
+        has_ext=False,
+        subset='training',
+        batch_size=1,
+        seed=42,
+        shuffle=False,
+        class_mode='categorical',
+        target_size=(32, 32))
+
+    print(len(train_generator))
+
+    valid_generator = datagen.flow_from_dataframe(
+        dataframe=traindf,
+        directory=os.path.join(basedir, 'training_set'),
+        x_col='5000',
+        y_col=function,
+        has_ext=False,
+        subset='validation',
+        batch_size=1,
+        seed=42,
+        shuffle=False,
+        class_mode='categorical',
+        target_size=(32, 32))
+
+    test_datagen = ImageDataGenerator(rescale=1. / 255.)
+
+    test_generator = test_datagen.flow_from_dataframe(
+        dataframe=testdf,
+        directory=os.path.join(basedir, 'testing_set'),
+        x_col='5000',
+        y_col=None,
+        has_ext=False,
+        batch_size=1,
+        seed=42,
+        shuffle=False,
+        class_mode=None,
+        target_size=(32, 32))
+
+    # Initialising
+    classifier = Sequential()
+
+    # Convolution layers
+    classifier.add(Conv2D(32, (3, 3), padding='same',
+                          input_shape=(32, 32, 3)))
+    classifier.add(Activation('relu'))
+    classifier.add(Conv2D(32, (3, 3)))
+    classifier.add(Activation('relu'))
+    classifier.add(MaxPooling2D(pool_size=(2, 2)))
+    classifier.add(Dropout(0.25))
+    classifier.add(Conv2D(64, (3, 3), padding='same'))
+    classifier.add(Activation('relu'))
+    classifier.add(Conv2D(64, (3, 3)))
+    classifier.add(Activation('relu'))
+    classifier.add(MaxPooling2D(pool_size=(2, 2)))
+    classifier.add(Dropout(0.25))
+
+    if function == 'Unnamed: 1':
+        den = 8
+    else:
+        den = 3
+
+    # Flattening
+    classifier.add(Flatten())
+
+    # Full connection
+    classifier.add(Dense(512))
+    classifier.add(Activation('relu'))
+    classifier.add(Dropout(0.5))
+    classifier.add(Dense(den, activation='softmax'))
+
+    # Compiling the CNN
+    classifier.compile(optimizers.rmsprop(lr=0.0001, decay=1e-6),
+                       loss="categorical_crossentropy",
+                       metrics=["accuracy"])
+
+    # Fitting the Model
+    STEP_SIZE_TRAIN = train_generator.n // train_generator.batch_size
+    STEP_SIZE_VALID = valid_generator.n // valid_generator.batch_size
+    classifier.fit_generator(generator=train_generator,
+                             steps_per_epoch=STEP_SIZE_TRAIN,
+                             validation_data=valid_generator,
+                             validation_steps=STEP_SIZE_VALID,
+                             epochs=1
+                             )
+
+    # Evaluate the model
+    score = classifier.evaluate_generator(generator=valid_generator, steps=len(valid_generator))
+    print('Test loss:', score[0])
+    print('Test accuracy:', score[1])
+
+    # Predict the output
+    test_generator.reset()
+    pred = classifier.predict_generator(test_generator, steps=len(test_generator), verbose=1)
+
+    predicted_class_indices = np.argmax(pred, axis=1)
+
+    labels = (train_generator.class_indices)
+    labels = dict((v, k) for k, v in labels.items())
+    predictions = [labels[k] for k in predicted_class_indices]
+
+    if function == smile:
+        task = 'task_1.csv'
+    elif function == age:
+        task = 'task_2.csv'
+    elif function == glasses:
+        task = 'task_3.csv'
+    elif function == human:
+        task = 'task_4.csv'
+    elif function == hair:
+        task = 'task_5.csv'
+
+    # Save predicted results to csv file
+    filenames = test_generator.filenames
+    results = pd.DataFrame({"Filename": filenames,
+                            "Predictions": predictions})
+    results.columns = ['accuracy',score[1]]
+    results.to_csv(os.path.join(basedir,task), index=False)
+
+    return 0
+
+
+
+if __name__ == '__main__':
+    print('0 for remove noisy images')
+    print('1 for Task 1, Emotional recognition')
+    print('2 for Task 2, Age identifiction')
+    print('3 for Task 3, Glasses detection')
+    print('4 for Task 4, Human detection')
+    print('5 for Task5, Hair colour recognition')
+    fun_input = input('task to do')
+    type(fun_input)
+
+    if fun_input == '0':
+        rev_noise()
+        print('noisy images have been removed')
+
+    elif fun_input == '1':
+        cnn(smile)
+
+    elif fun_input == '2':
+        cnn(age)
+
+    elif fun_input == '3':
+        cnn(glasses)
+
+    elif fun_input == '4':
+        cnn(human)
+
+    elif fun_input == '5':
+        cnn(hair)
+
+    print('Task',fun_input,'is done')
+
+
