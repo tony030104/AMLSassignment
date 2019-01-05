@@ -47,7 +47,7 @@ def rev_noise():
         # Detect faces in the image
         faces = face_patterns.detectMultiScale(
             gray,
-            scaleFactor=1.008,
+            scaleFactor=1.005,
             minNeighbors=5,
             minSize=(100, 100),
         )
@@ -96,11 +96,10 @@ def cnn(function):
         y_col=function,
         has_ext=False,
         subset='training',
-        batch_size=3,
-        seed=7,
+        batch_size=1,
         shuffle=False,
         class_mode='categorical',
-        target_size=(32, 32))
+        target_size=(64, 64))
 
     print(len(train_generator))
 
@@ -112,10 +111,9 @@ def cnn(function):
         has_ext=False,
         subset='validation',
         batch_size=1,
-        seed=7,
-        shuffle=True,
+        shuffle=False,
         class_mode='categorical',
-        target_size=(32, 32))
+        target_size=(64, 64))
 
     test_datagen = ImageDataGenerator(rescale=1. / 255.)
 
@@ -126,17 +124,16 @@ def cnn(function):
         y_col=function,
         has_ext=False,
         batch_size=1,
-        seed=7,
         shuffle=False,
         class_mode=None,
-        target_size=(32, 32))
+        target_size=(64, 64))
 
     # Initialising
     classifier = Sequential()
 
     # Convolution layers
     classifier.add(Conv2D(32, (3, 3), padding='same',
-                          input_shape=(32, 32, 3)))
+                          input_shape=(64, 64, 3)))
     classifier.add(Activation('relu'))
     classifier.add(Conv2D(32, (3, 3)))
     classifier.add(Activation('relu'))
@@ -175,7 +172,7 @@ def cnn(function):
                              steps_per_epoch=STEP_SIZE_TRAIN,
                              validation_data=valid_generator,
                              validation_steps=STEP_SIZE_VALID,
-                             epochs=20
+                             epochs=25
                              )
 
     # Evaluate the model
@@ -210,7 +207,7 @@ def cnn(function):
         column = traindf.hair_color
 
     label = list(column)
-    del label[0:3451]
+    del label[0:len(label) - len(predictions)]
 
     count = 0
     i = 0
@@ -263,4 +260,5 @@ if __name__ == '__main__':
         cnn(hair)
 
     print('Task',fun_input,'is done')
+
 
