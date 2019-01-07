@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 global basedir, smile, age, glasses, human, hair
 basedir = 'C:/Users/user/PycharmProjects/Assignment/venv'
+
 smile = 'smiling'
 age = 'young'
 glasses = 'eyeglasses'
@@ -79,13 +80,13 @@ def rev_noise():
     df = pd.DataFrame(df)
     df.insert(6, 'face', face)
     df1 = df[-df.face.isin([0])]
-    df1.to_csv(os.path.join(basedir, "face.csv"), index=False)
+    df1.to_csv(os.path.join(basedir, "attribute_list_face.csv"), index=False)
 
     return 0
 
 def cnn(function):
 
-    traindf = pd.read_csv(os.path.join(basedir, 'face.csv'))
+    traindf = pd.read_csv(os.path.join(basedir, 'attribute_list_face.csv'))
 
     # Fitting the CNN to the images
     datagen = ImageDataGenerator(rescale=1. / 255., validation_split=0.25)
@@ -192,46 +193,34 @@ def cnn(function):
     if function == smile:
         task = 'task_1.csv'
         fig_acc = 'task_1_acc.png'
-        fig_lose = 'task_1_loss.png'
         column = traindf.smiling
     elif function == age:
         task = 'task_2.csv'
         fig_acc = 'task_2_acc.png'
-        fig_lose = 'task_2_loss.png'
         column = traindf.young
     elif function == glasses:
         task = 'task_3.csv'
         fig_acc = 'task_3_acc.png'
-        fig_lose = 'task_3_loss.png'
         column = traindf.eyeglasses
     elif function == human:
         task = 'task_4.csv'
         fig_acc = 'task_4_acc.png'
-        fig_lose = 'task_4_loss.png'
         column = traindf.human
     elif function == hair:
         task = 'task_5.csv'
         fig_acc = 'task_5_acc.png'
-        fig_lose = 'task_5_loss.png'
         column = traindf.hair_color
 
-    # History for accuracy
+    # History for accuracy and loss
     plt.plot(clf.history['acc'])
     plt.plot(clf.history['val_acc'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'validation'], loc='upper left')
-    plt.savefig(os.path.join(basedir, fig_acc))
-
-    # History for loss
     plt.plot(clf.history['loss'])
     plt.plot(clf.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
+    plt.title('model accuracy and loss')
+    plt.ylabel('percentage')
     plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig(os.path.join(basedir, fig_lose))
+    plt.legend(['train', 'validation', 'train', 'validation'], loc='upper left')
+    plt.savefig(os.path.join(basedir, fig_acc))
     plt.close()
 
     label = list(column)
@@ -259,6 +248,7 @@ def cnn(function):
 
 
 if __name__ == '__main__':
+    print('press number to select the task')
     print('0 for remove noisy images')
     print('1 for Task 1, Emotional recognition')
     print('2 for Task 2, Age identifiction')
@@ -288,5 +278,3 @@ if __name__ == '__main__':
         cnn(hair)
 
     print('Task',fun_input,'is done')
-
-
