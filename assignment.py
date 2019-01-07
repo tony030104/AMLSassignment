@@ -22,7 +22,7 @@ hair = 'hair_color'
 
 def rev_noise():
     # In this function, we load images from the dataset and remove any noisy images from the dataset
-    # Create two folders, one for training set and the other for test set
+    # Create two folders, seperate dataset to training set and test set
 
     # Image path
     images_dir = os.path.join(basedir, 'dataset')
@@ -81,8 +81,12 @@ def rev_noise():
     return 0
 
 def cnn(function):
-    # This function build the CNN model and train the model with training set
-    # Predict the label of test set images
+    # This function build the CNN model and load the training set and test set
+    # Split the training set to train and validation
+    # Train the model by the train set
+    # Evaluate the model by the validation set
+    # Tehn, predict the label of test set images
+    # Write the results to a csv file
 
     traindf = pd.read_csv(os.path.join(basedir, 'attribute_list_face.csv'))
 
@@ -171,7 +175,7 @@ def cnn(function):
                                    steps_per_epoch=STEP_SIZE_TRAIN,
                                    validation_data=valid_generator,
                                    validation_steps=STEP_SIZE_VALID,
-                                   epochs=10
+                                   epochs=20
                                    )
 
     # Evaluate the model
