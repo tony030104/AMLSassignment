@@ -23,10 +23,15 @@
 When running the code, the screen will display:
 
 `0 for remove noisy images
+
  1 for Task 1, Emotional recognition
+ 
  2 for Task 2, Age identifiction
+ 
  3 for Task 3, Glasses detection
+ 
  4 for Task 4, Human detection
+ 
  5 for Task 5, Hair colour recognition`
  
 
