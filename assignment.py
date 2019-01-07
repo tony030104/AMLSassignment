@@ -1,9 +1,9 @@
 import cv2
 from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator
-from keras.layers import Dense, Activation, Flatten, Dropout, BatchNormalization
+from keras.layers import Dense, Activation, Flatten, Dropout
 from keras.layers import Conv2D, MaxPooling2D
-from keras import regularizers, optimizers
+from keras import optimizers
 import pandas as pd
 import numpy as np
 import os
