@@ -175,7 +175,7 @@ def cnn(function):
                                    steps_per_epoch=STEP_SIZE_TRAIN,
                                    validation_data=valid_generator,
                                    validation_steps=STEP_SIZE_VALID,
-                                   epochs=20
+                                   epochs=10
                                    )
 
     # Evaluate the model
