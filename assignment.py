@@ -240,6 +240,7 @@ def cnn(function):
     acc = count / len(predictions)
 
     # Save predicted results to csv file
+    # Inference on the Test Set
     filenames = test_generator.filenames
     results = pd.DataFrame({"Filename": filenames,
                             "Predictions": predictions})
