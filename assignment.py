@@ -10,8 +10,10 @@ import os
 import matplotlib.pyplot as plt
 
 global basedir, smile, age, glasses, human, hair
+# Set the working directory to the base direction
 basedir = 'C:/Users/user/PycharmProjects/Assignment/venv'
 
+# Convert function name to the string type
 smile = 'smiling'
 age = 'young'
 glasses = 'eyeglasses'
@@ -19,28 +21,29 @@ human = 'human'
 hair = 'hair_color'
 
 def rev_noise():
+    # In this function, we load images from the dataset and remove any noisy images from the dataset
+    # Create two folders, one for training set and the other for test set
+
     # Image path
     images_dir = os.path.join(basedir, 'dataset')
 
     # Create the face cascade
     face_patterns = cv2.CascadeClassifier(os.path.join(basedir, 'haarcascade_frontalface_default.xml'))
 
-    Train = []
-    Test = []
-    face = []
-    c = 1
-    count = 0
-
+    # Create new folders for training set and test set
     training_set = './training_set/'
     testing_set = './testing_set/'
-
     if not os.path.exists(training_set):
         os.mkdir(training_set)
     if not os.path.exists(testing_set):
         os.mkdir(testing_set)
 
+    face = []
+    count = 1
+
+    # Using for loop to detect each image
     for img in os.listdir(images_dir):
-        im = str(c) + '.png'
+        im = str(count) + '.png'
 
         # Read the image
         image = cv2.imread(os.path.join(images_dir, im))
@@ -54,13 +57,11 @@ def rev_noise():
             minSize=(100, 100),
         )
 
+        # split dataset to training set and test set
         if len(faces) != 0:
-            count += 1
-            if c > 4000:
-                Test.append(c)
+            if count > 4000:
                 cv2.imwrite(os.path.join(testing_set, im), image);
             else:
-                Train.append(c)
                 cv2.imwrite(os.path.join(training_set, im), image);
 
             face.append(1)
@@ -68,14 +69,9 @@ def rev_noise():
         else:
             face.append(0)
 
-        c += 1
+        count += 1
 
-
-    print(count)
-
-    print(Train)
-    print(Test)
-
+    # remove label from the dataframe in csv file
     df = pd.read_csv(os.path.join(basedir, 'attribute_list.csv'), header=1)
     df = pd.DataFrame(df)
     df.insert(6, 'face', face)
@@ -85,12 +81,15 @@ def rev_noise():
     return 0
 
 def cnn(function):
+    # This function build the CNN model and train the model with training set
+    # Predict the label of test set images
 
     traindf = pd.read_csv(os.path.join(basedir, 'attribute_list_face.csv'))
 
     # Fitting the CNN to the images
     datagen = ImageDataGenerator(rescale=1. / 255., validation_split=0.25)
 
+    # Load images to train, validation, and test generator
     train_generator = datagen.flow_from_dataframe(
         dataframe=traindf,
         directory=os.path.join(basedir, 'training_set'),
@@ -165,7 +164,7 @@ def cnn(function):
                        loss="categorical_crossentropy",
                        metrics=["accuracy"])
 
-    # Fitting the Model
+    # Fitting the model
     STEP_SIZE_TRAIN = train_generator.n // train_generator.batch_size
     STEP_SIZE_VALID = valid_generator.n // valid_generator.batch_size
     clf = classifier.fit_generator(generator=train_generator,
@@ -180,7 +179,7 @@ def cnn(function):
     print('Test loss:', score[0])
     print('Test accuracy:', score[1])
 
-    # Predict the output
+    # Predict the label of test images
     test_generator.reset()
     pred = classifier.predict_generator(test_generator, steps=len(test_generator), verbose=1)
 
@@ -211,7 +210,7 @@ def cnn(function):
         fig_acc = 'task_5_acc.png'
         column = traindf.hair_color
 
-    # History for accuracy and loss
+    # Plotting training curve for accuracy and loss
     plt.plot(clf.history['acc'])
     plt.plot(clf.history['val_acc'])
     plt.plot(clf.history['loss'])
@@ -245,9 +244,9 @@ def cnn(function):
 
     return 0
 
-
-
 if __name__ == '__main__':
+
+    # Select function
     print('press number to select the task')
     print('0 for remove noisy images')
     print('1 for Task 1, Emotional recognition')
