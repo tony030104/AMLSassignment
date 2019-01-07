@@ -10,7 +10,6 @@
 
 ## Technologies
 * Python 3.6
-
 > The code is run under python 3.6 enviroment. There are some libraries used in the code:
 * OpenCV
 * Keras
@@ -29,6 +28,7 @@ When running the code, the screen will display:
  3 for Task 3, Glasses detection
  4 for Task 4, Human detection
  5 for Task 5, Hair colour recognition`
+ 
 
 Press 0 to remove noisy images from the dataset and seperate them to training set and test set.
 This is done by the function rev_noise() in the code.
@@ -55,15 +55,18 @@ This can be changed in code directory in test_generator:
         dataframe=traindf,
         directory=os.path.join(basedir, 'testing_set'),
         ...)`
+        
 Or you can change the name of the dataset to testing_set and put the folder into your working directory
 You can also change the number of epochs in fit function:
 
 `clf = classifier.fit_generator(...
                                    epochs=10
                                    )`
+                                   
 When code is done, the screen will display:
 
 `Task X is done`
+
 There are 2 files save in your folder.
 * Task_X.csv contains predictions of test images with accuracy at the top
 * Task_X_acc.png shows the learning curves graph
