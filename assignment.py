@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 global basedir, smile, age, glasses, human, hair
 # Set the working directory to the base direction
-basedir = 'C:/Users/user/PycharmProjects/Assignment/venv'
+basedir = './'
 
 # Convert function name to the string type
 smile = 'smiling'
