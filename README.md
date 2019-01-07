@@ -22,6 +22,7 @@
 
 ## Procedures
 When running the code, the screen will display:
+
 `0 for remove noisy images
  1 for Task 1, Emotional recognition
  2 for Task 2, Age identifiction
@@ -32,6 +33,7 @@ When running the code, the screen will display:
 Press 0 to remove noisy images from the dataset and seperate them to training set and test set.
 This is done by the function rev_noise() in the code.
 In the code:
+
 `basedir` is the path where the working directory is. This need to be changed to your working directory.
 This folder should contain all document including dataset, attribute_list.csv, haarcascade_frontalface_default.xml
 After running rev_noise() function, any images without face are removed.
@@ -40,22 +42,27 @@ There are three files created:
 * training_set folder contains images for training and validation
 * testing_set folder contains images for testing
 Then the screen will display:
+
 `noisy images have been removed`
+
 `Task 0 is done`
 
 Run the code again, this time press any number from 1 to 5 to select the task to do.
 The directory for test set needs to be changed if you are using other test set.
 This can be changed in code directory in test_generator:
+
 `test_generator = test_datagen.flow_from_dataframe(
         dataframe=traindf,
         directory=os.path.join(basedir, 'testing_set'),
         ...)`
 Or you can change the name of the dataset to testing_set and put the folder into your working directory
 You can also change the number of epochs in fit function:
+
 `clf = classifier.fit_generator(...
                                    epochs=10
                                    )`
 When code is done, the screen will display:
+
 `Task X is done`
 There are 2 files save in your folder.
 * Task_X.csv contains predictions of test images with accuracy at the top
@@ -63,4 +70,5 @@ There are 2 files save in your folder.
 
 ## Contact
 Created by Yu-Cheng Tsai
+
 email: zceeyts@ucl.ac.uk
