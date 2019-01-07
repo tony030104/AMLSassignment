@@ -216,7 +216,7 @@ def cnn(function):
     plt.plot(clf.history['loss'])
     plt.plot(clf.history['val_loss'])
     plt.title('model accuracy and loss')
-    plt.ylabel('percentage')
+    plt.ylabel('acc/loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'validation', 'train', 'validation'], loc='upper left')
     plt.savefig(os.path.join(basedir, fig_acc))
